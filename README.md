@@ -1,5 +1,7 @@
 Regularly reports health state of a Node.js app to [Consul](https://consul.io). Useful for TTL kind of [checks](https://consul.io/docs/agent/checks.html).
 
+Does not perform registration of a service, at least for now. If you're using Docker, check this excellent [automatical service registrator](https://github.com/progrium/registrator).
+
 
 ## Installation
 
@@ -27,8 +29,8 @@ var Reporter = require('consul-health-reporter/es5')
 Returns a new instance of reporter.
 
 * `serviceId` ID of the service, which must be already registered in Consul; required.
-* `opts.consulAgentUrl` URL of local Consul agent, defaults to `'http://127.0.0.1:8500'`.
-* `opts.intervalSec` Interval between successive reports, defaults to 5 seconds. Should be smaller than TTL specified for the check.
+* `opts.consulAgentUrl` URL of local Consul agent's HTTP interface, defaults to `'http://127.0.0.1:8500'`.
+* `opts.intervalSec` Interval between successive reports, defaults to 5 seconds. Should be smaller than TTL specified for the Consul check, to reduce the possibility of Consul assuming that the service is dead when a report was delayed due to ephemeral conditions, e.g. high CPU load.
 * `opts.check` A function to determine current health state of the app; defaults to always reporting passing state. It is called each time health is about to be reported, and provided with three arguments: `pass`, `warn` and `fail`, which are functions that accept a single optional parameter, `note`. The check function should return the result of calling one of these functions, e.g. `return pass('ok')`.
 
 The reporter will not report anything until `reporter.resume()` is called.
@@ -37,21 +39,22 @@ The reporter will not report anything until `reporter.resume()` is called.
 
 `reporter.resume()`
 
-Starts reporting health to Consul, or resumes normal operation after calling `makeWarn()` or `makeFail()`.
+Starts reporting health to Consul, or resumes normal operation after calling `makeWarn()` or `makeFail()`. Sends the first report immediately.
 
 Returns the same reporter instance.
 
 ### makeWarn and makeFail
 
 `reporter.makeWarn(note)`
+
 `reporter.makeFail(note)`
 
 Immediately reports warning/failure health state to Consul. Stops consulting `opts.check` function, assuming that health state will not change until `reporter.resume()` is called.
 
-Returns the same reporter instance.
+The `note` parameter is optional. Returns the same reporter instance.
 
 
-### Example
+## Example
 
 ```js
 var Reporter = require('consul-health-reporter/es5');
@@ -83,7 +86,7 @@ function reportAndExit(err) {
 http.createServer(app.callback())
 
 .on('error', function(err) {
-  reportAndExit('error starting server: ' + err);
+  reportAndExit('cannot start server: ' + err);
 })
 
 .listen(3000, function() {
