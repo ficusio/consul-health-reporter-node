@@ -1,0 +1,32 @@
+{
+  "name": "consul-health-reporter",
+  "version": "0.8.0",
+  "description": "Regularly reports app health state to Consul",
+  "scripts": {
+    "prepublish": "mkdir -p es5 && 6to5 index.js --out-file es5/index.js --source-maps",
+    "test": "echo 'Sorry, no tests yet' && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ficusio/consul-health-reporter-node.git"
+  },
+  "keywords": [
+    "consul"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ficusio/consul-health-reporter-node/issues"
+  },
+  "homepage": "https://github.com/ficusio/consul-health-reporter-node",
+  "dependencies": {
+    "needle": "^0.7.11"
+  },
+  "devDependencies": {
+    "6to5": "^3.4.1"
+  },
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "es5"
+  ]
+}
