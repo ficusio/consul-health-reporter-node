@@ -22,11 +22,13 @@ const pass = (note = 'OK') => new CheckResult('pass', note);
 const warn = (note = 'Help me please!') => new CheckResult('warn', note);
 const fail = (note = 'I\'m a teapot.') => new CheckResult('fail', note);
 
+type State = 'pass' | 'warn' | 'fail';
+
 class CheckResult {
-	state: string;
+	state: State;
 	note: string;
 
-	constructor(state: 'pass' | 'warn' | 'fail', note: string) {
+	constructor(state: State, note: string) {
 		this.state = state;
 		this.note = stringify(note);
 	}
@@ -35,14 +37,14 @@ class CheckResult {
 /**
  * Regularly reports health state to Consul.
  */
-export default class ConsulHealthReporter {
+export class ConsulHealthReporter {
 	private readonly checkId: string;
 	private readonly consulAgentUrl: string;
 	private readonly intervalSec: number;
-	private readonly checkFunc: (pass: (note?: string) => CheckResult, warn: (note?: string) => CheckResult, fail: (note?: string) => CheckResult) => CheckResult;
 	private scheduleId: number | undefined;
 	private interrupted: boolean;
 	private result: CheckResult | undefined;
+	public checkFunc: (pass: (note?: string) => CheckResult, warn: (note?: string) => CheckResult, fail: (note?: string) => CheckResult) => CheckResult;
 
 	constructor(serviceId: string, {
 		consulAgentUrl = 'http://127.0.0.1:8500',
