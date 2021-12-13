@@ -3,7 +3,7 @@
   "version": "0.9.0",
   "description": "Regularly reports app health state to Consul",
   "scripts": {
-    "prepublish": "npm run build",
+    "prepare": "npm run build",
     "test": "npm run build && npm run coverage:types",
     "build": "tsup ./src/index.ts --dts",
     "typesync": "typesync",
