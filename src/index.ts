@@ -1,6 +1,20 @@
 import got, { RequestError } from 'got';
 
-const defaultCheck = () => pass();
+type State = 'pass' | 'warn' | 'fail';
+
+class CheckResult {
+	state: State;
+	note: string;
+
+	constructor(state: State, note: string) {
+		this.state = state;
+		this.note = stringify(note);
+	}
+}
+
+type CheckFunction = (pass?: (note?: string) => CheckResult, warn?: (note?: string) => CheckResult, fail?: (note?: string) => CheckResult) => CheckResult;
+
+const defaultCheck: CheckFunction = () => pass();
 
 const stringify = (obj: unknown): string => {
 	if (typeof obj === 'string') {
@@ -22,18 +36,6 @@ const pass = (note = 'OK') => new CheckResult('pass', note);
 const warn = (note = 'Help me please!') => new CheckResult('warn', note);
 const fail = (note = 'I\'m a teapot.') => new CheckResult('fail', note);
 
-type State = 'pass' | 'warn' | 'fail';
-
-class CheckResult {
-	state: State;
-	note: string;
-
-	constructor(state: State, note: string) {
-		this.state = state;
-		this.note = stringify(note);
-	}
-}
-
 /**
  * Regularly reports health state to Consul.
  */
@@ -41,15 +43,19 @@ export class ConsulHealthReporter {
 	private readonly checkId: string;
 	private readonly consulAgentUrl: string;
 	private readonly intervalSec: number;
+	private readonly checkFunc: CheckFunction;
 	private scheduleId: number | undefined;
 	private interrupted: boolean;
 	private result: CheckResult | undefined;
-	public checkFunc: (pass: (note?: string) => CheckResult, warn: (note?: string) => CheckResult, fail: (note?: string) => CheckResult) => CheckResult;
 
 	constructor(serviceId: string, {
 		consulAgentUrl = 'http://127.0.0.1:8500',
 		intervalSec = 5,
 		check = defaultCheck
+	}: {
+		consulAgentUrl?: string;
+		intervalSec?: number;
+		check?: CheckFunction;
 	} = {}) {
 		this.checkId = `service:${serviceId}`;
 		this.consulAgentUrl = consulAgentUrl;
