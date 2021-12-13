@@ -12,7 +12,7 @@ class CheckResult {
 	}
 }
 
-type CheckFunction = (pass?: (note?: string) => CheckResult, warn?: (note?: string) => CheckResult, fail?: (note?: string) => CheckResult) => CheckResult;
+type CheckFunction = (pass: (note?: string) => CheckResult, warn: (note?: string) => CheckResult, fail: (note?: string) => CheckResult) => CheckResult;
 
 const defaultCheck: CheckFunction = () => pass();
 
