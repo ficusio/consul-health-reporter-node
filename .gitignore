@@ -1,3 +1,5 @@
-/node_modules/
-/es5/
-/_*
+node_modules
+dist
+coverage
+coverage-ts
+.nyc
